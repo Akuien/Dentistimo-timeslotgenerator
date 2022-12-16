@@ -22,7 +22,7 @@ Timeslots generator acts as subscriber when recieving the date published by the 
 2. Go to terminal and install all dependancies using: `npm install`
 3. To run the component do: `cd src ` then  ` node main.js`
 
-##Technologies:
+## Technologies:
 - Node.js
 - MongoDB
 - HiveMQ
