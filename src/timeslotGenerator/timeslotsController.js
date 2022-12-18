@@ -6,7 +6,7 @@ var mqtt = require("../main")
 
 mqtt.subscribe("appointment/getAllTimeslots");
 db.connect;
-
+/* 
 function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
     BookingModel.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
@@ -26,7 +26,7 @@ function gettimeSlots(topic, payload) {
             })
         })
     }
-}
+} */
 
 
 module.export= {
