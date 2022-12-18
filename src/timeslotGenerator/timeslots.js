@@ -64,16 +64,16 @@ async function createAppointment() {
             }
         }   var appointment = {
             id:  dentistsJson.dentists[i].id,
-            dentistsNum : dentistsNum,
             name :  dentistsJson.dentists[i].name,
             address :  dentistsJson.dentists[i].address,
+            dentistsNum: dentistsNum,
             date : "",
             day : day,
             timeSlots: timeSlots,
                 
             }
             appointments.push(appointment)
-            console.log(appointments)
+            console.log(appointment)
         })
     } return appointments;
 }

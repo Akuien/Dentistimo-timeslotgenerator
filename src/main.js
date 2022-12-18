@@ -18,7 +18,15 @@ const client = mqtt.connect({
   })
 
 
-// setup the callbacks
+  var EventEmitter = require('events')
+
+  var ee = new EventEmitter()
+  ee.on('message', function (text) {
+    console.log(text)
+  })
+  ee.emit('message', 'hello world')
+
+
 client.on('connect', function () {
     console.log('Connected Successfully');
 });
@@ -29,8 +37,7 @@ client.on('error', function (error) {
 
 
 client.on('message', function (topic, message) {
-    // called each time a message is received
-    console.log('Received message:', topic, message.toString());
+  console.log(String.fromCharCode.apply(null, message)); 
 });
 
 function publish(topic,message){
@@ -41,19 +48,19 @@ function publish(topic,message){
 
   function subscribe(topic){
     client.on("connect", () => {
-      console.log("Client:" + clientId + " connected!");
+      console.log(" connected!!!");
       client.subscribe(topic, { qos: 2 });})
   }
 
-  
-  
-module.exports={
+module.exports= {
+
     publish(topic,message){
       publish(topic,message)
     },
     subscribe(topic){
       subscribe(topic)
     },
-    client:client,
-  
+    ee: ee,
+    client:client
+
   }
