@@ -3,10 +3,7 @@ const DentistsModel = require("../Models/DentistsModel");
 const mongoose = require("mongoose");
 var moment = require('moment');
 moment().format();
-
 var fetch = require("node-fetch")
-const mqtt = require("../main");
-
 
 
 
@@ -83,6 +80,7 @@ var alltimeSlots = createAppointment();
 
 module.exports = {
     alltimeSlots,
-    appointments
+    appointments,
+    
     }
 
