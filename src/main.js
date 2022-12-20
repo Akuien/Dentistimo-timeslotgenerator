@@ -1,12 +1,11 @@
 var mqtt = require('mqtt');
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '.env') })
-
-
+// const path = require('path')
+// require('dotenv').config({ path: path.resolve(__dirname, '.env') })
+const Appointment = require("./Models/AppointmentModel");
 var db = require("./Database")
 var timeslotGenerator = require("./timeslotGenerator/timeslots")
-var timeslotController = require("./timeslotGenerator/timeslotsController")
-var BookingModel = require("./Models/BookingModel");
+// var timeslotController = require("./timeslotGenerator/timeslotsController")
+
 db.connect;
 
 const options = {
@@ -19,16 +18,6 @@ const options = {
 
 const client = mqtt.connect(options)
 
-client.on("message", function(topic, message) {
-  try{
-  console.log(message)
-  var stringMessage = message.toString();
-  var jsonMessage = JSON.parse(stringMessage);
-  ee.emit('messageArrived',topic, jsonMessage);
-  }catch(error){
-    console.log(error.message);
-  }
-});
 
 client.on('connect', function () {
     console.log('Connected Successfully');
@@ -49,9 +38,7 @@ function publish(topic,message){
     });
   }
 
-let topic = "appointment/getAllTimeslots"
   client.on("connect", () => {
-    console.log("Connected Now!");
     client.subscribe([topic], () => {
       console.log(`Subscribed to ${topic}`);
     });
@@ -60,13 +47,53 @@ let topic = "appointment/getAllTimeslots"
   timeslotGenerator.createAppointment;
 
 
-  client.on("message", (topic, payload) => {
-    console.log(payload.toString());
-    timeslotController.gettimeSlots(topic, payload);
-  });
-
-
-
+  let topic = "appointment/getAllTimeslots";
+  let response1 = "sendTimeSlots"
+  
+  function gettimeSlots(topic, payload) {
+    if(topic == "appointment/getAllTimeslots"){
+      Appointment.find({dentistid : payload.dentistid , date : payload.date},
+          function(err,appointment){
+            let result = timeslotGenerator.alltimeSlots.then(app => {
+                let item = app.filter(function(appj){
+                    appj.date = payload.date;
+                    return appj.day == payload.day && appj.id == payload.dentistid
+                })
+                try {
+                var timeSlots = []
+                timeSlots = item[0].timeSlots
+                console.log(appointment);
+                for (let i=0 ; i<timeSlots.length ; i++){
+                    var slot = ""
+                    var counter = 0
+                    for(let j=0 ; j<appointment.length ; j++){
+                    if(item[0].timeSlots[i] === appointment[j].slot) {
+                    counter = counter + 1;
+  
+                    slot = appointment[j].slot
+                    if (counter >= item[0].dentistsNum){
+                    var index = item[0].timeSlots.indexOf(slot);
+                    if(index > -1){
+                    item[0].timeSlots.splice(i,1)
+                   // console.log(item[0])
+                    }
+                }
+            }   
+        } 
+    }
+        let slots = JSON.stringify(item[0]);
+             client.publish(response1, slots, { qos: 1, retain: false });
+             console.log(item[0]);
+             }catch(error){
+              console.log(error.message);
+                }
+            })
+        })
+    }
+  } 
+  
+  module.exports.gettimeSlots = gettimeSlots;
+  
 module.exports= {
 
     publish(topic,message){
