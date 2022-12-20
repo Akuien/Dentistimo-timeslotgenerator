@@ -12,7 +12,7 @@ const bookingSchema = new mongoose.Schema(
             unique: true
         },
         user: {
-            type: mongoose.Schema.Types.ObjectId, 
+            type: String, 
             ref: "users"
         },
         date: {
@@ -43,11 +43,12 @@ const bookingSchema = new mongoose.Schema(
             required: true
         },
         dentist: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: String,
             required: true,
             ref: "dentists"
 
         },
+       
         issuance: {
             type:String,
             required: true

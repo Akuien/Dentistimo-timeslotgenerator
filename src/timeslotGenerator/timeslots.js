@@ -66,8 +66,7 @@ async function createAppointment() {
             dentistsNum: dentistsNum,
             date : "",
             day : day,
-            timeSlots: timeSlots,
-                
+            timeSlots: timeSlots
             }
             appointments.push(appointment)
             console.log(appointment)
@@ -75,12 +74,4 @@ async function createAppointment() {
     } return appointments;
 }
 
-var appointments = []
-var alltimeSlots = createAppointment();
-
-module.exports = {
-    alltimeSlots,
-    appointments,
-    
-    }
-
+module.exports.createAppointment =  createAppointment;
