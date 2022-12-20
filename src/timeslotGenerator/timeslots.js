@@ -1,6 +1,5 @@
-const Booking = require("../Models/BookingModel");
-const DentistsModel = require("../Models/DentistsModel");
-const mongoose = require("mongoose");
+const Appointment = require("../Models/AppointmentModel");
+
 var moment = require('moment');
 moment().format();
 var fetch = require("node-fetch")
@@ -35,9 +34,9 @@ function generateTimeslots(startingHour, minutes, endingHour, half) {
     }
     return timeSlots
 }
+var appointments = []
 
 async function createAppointment() {
-
     dentistsJson = await getDentists()
 
     for (i = 0; i <  dentistsJson.dentists.length; i++) {
@@ -47,12 +46,12 @@ async function createAppointment() {
           
         var day = key;
 
-        var opening = openinghours[key].slice(0, openinghours[key].indexOf('-').toString());
-        var openingHour = opening.slice(0, opening.indexOf(':').toString());
-        var closing = openinghours[key].slice(openinghours[key].lastIndexOf('-') + 1).toString();
-        var closingHour = closing.slice(0, closing.indexOf(':').toString());
+        var openinghour = openinghours[key].slice(0, openinghours[key].indexOf('-').toString());
+        var openingHour = openinghour.slice(0, openinghour.indexOf(':').toString());
+        var closinghour = openinghours[key].slice(openinghours[key].lastIndexOf('-') + 1).toString();
+        var closingHour = closinghour.slice(0, closinghour.indexOf(':').toString());
         var timeSlots = generateTimeslots(openingHour, 00, closingHour, 30);
-        var breaks = ['12:00','12:30','15:00', '10:00'];
+        var breaks = ['12:00','12:30','15:00', '10:00']; // take away lunch anf fika times
         for(let i=0; i < breaks.length; i++) {
             var timeslot = breaks[i];
             var index = timeSlots.indexOf(timeslot);
@@ -60,19 +59,31 @@ async function createAppointment() {
             timeSlots.splice(index, 1)
             }
         }   var appointment = {
-            id:  dentistsJson.dentists[i].id,
-            name :  dentistsJson.dentists[i].name,
-            address :  dentistsJson.dentists[i].address,
-            dentistsNum: dentistsNum,
-            date : "",
-            day : day,
-            timeSlots: timeSlots
+            id: dentistsJson.dentists[i].id,
+            name : dentistsJson.dentists[i].name,
+            owner : dentistsJson.dentists[i].owner,
+            address : dentistsJson.dentists[i].address,
+            city : dentistsJson.dentists[i].city,
+            openinghour: openingHour,
+            closinghour: closingHour,
+            timeSlots: timeSlots,
+            dentistsNum : dentistsNum,
+            day: day,   
+            date: ""
             }
+
             appointments.push(appointment)
             console.log(appointment)
         })
     } return appointments;
 }
-var appointments = []
+
+var alltimeSlots = createAppointment();
+
+
 
 module.exports.createAppointment =  createAppointment;
+
+module.exports= {
+    alltimeSlots
+}

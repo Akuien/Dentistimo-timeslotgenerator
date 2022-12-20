@@ -57,7 +57,7 @@ let topic = "appointment/getAllTimeslots"
     });
   });
 
-  timeslotGenerator.createAppointment();
+  timeslotGenerator.createAppointment;
 
 
   client.on("message", (topic, payload) => {

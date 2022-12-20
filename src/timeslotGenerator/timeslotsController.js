@@ -1,6 +1,7 @@
 var db = require("../Database")
 var timeslotGenerator = require("./timeslots")
-var BookingModel = require("../Models/BookingModel")
+const Appointment = require("../Models/AppointmentModel");
+
 
 /* 
 let topic = "appointment/getAllTimeslots";
@@ -10,7 +11,7 @@ db.connect;
 
 function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
-    BookingModel.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
+    Appointment.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
             let result = timeslotGenerator.alltimeSlots.then(a => {
                 let item = a.filter(function(e){
                     e.date = payload.date;
@@ -37,7 +38,7 @@ let response= "sendTimeSlots"
 
 function gettimeSlots(topic, payload) {
   if(topic == "appointment/getAllTimeslots"){
-    BookingModel.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
+    Appointment.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
           let result = timeslotGenerator.alltimeSlots.then(a => {
               let item = a.filter(function(e){
                   e.date = payload.date;
@@ -48,7 +49,7 @@ function gettimeSlots(topic, payload) {
               timeSlots = item[0].timeSlots
               for (let i=0 ; i<timeSlots.length ; i++){
                   var slot = ""
-                  var counter = 0
+                  counter = 0
                   for(let j=0 ; j<appointment.length ; j++){
                   if(item[0].timeSlots[i] === appointment[j].slot) {
                   counter = counter + 1;
