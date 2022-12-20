@@ -73,5 +73,6 @@ async function createAppointment() {
         })
     } return appointments;
 }
+var appointments = []
 
 module.exports.createAppointment =  createAppointment;
