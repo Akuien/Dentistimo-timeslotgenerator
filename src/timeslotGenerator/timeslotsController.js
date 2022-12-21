@@ -1,24 +1,13 @@
 var db = require("../Database")
 var timeslotGenerator = require("./timeslots")
-var BookingModel = require("../Models/BookingModel")
-var mqtt = require("../main")
+const BookingModel = require("../Models/BookingModel");
 
+
+/* 
+let topic = "appointment/getAllTimeslots";
 
 mqtt.subscribe("appointment/getAllTimeslots");
 db.connect;
-
-
-/* let timeslotsTopic= "appointment/getAllTimeslots"
-
-function sendTimeslots(timeslots, clinicId) {
-    mqtt.publish(timeslotsTopic, JSON.stringify({
-        timeSlots: timeslots,
-        clinicId: clinicId,
-      }), {qos:1}
-    );
-    console.log("Timeslots are valid");
-  }
-   */
 
 function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
@@ -32,16 +21,16 @@ function gettimeSlots(topic, payload) {
                 var timeSlots=[]
                 timeSlots = item[0].timeSlots
                 console.log(appointment);
-             mqtt.publish(`sendTimeSlots` ,JSON.stringify(appointments));
+             mqtt.publish(`sendTimeSlots` ,JSON.stringify(item[0]));
              }catch(error){
               console.log(error.message);
                 }
             })
         })
     }
-}
+} 
 
-module.export= {
-    gettimeSlots
-}
- 
+
+
+module.exports.gettimeSlots = gettimeSlots;
+*/

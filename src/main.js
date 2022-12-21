@@ -1,24 +1,25 @@
 var mqtt = require('mqtt');
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '.env') })
-
-
+// const path = require('path')
+// require('dotenv').config({ path: path.resolve(__dirname, '.env') })
+const BookingModel = require("./Models/BookingModel");
 var db = require("./Database")
 var timeslotGenerator = require("./timeslotGenerator/timeslots")
-var BookingModel = require("./Models/BookingModel");
+// var timeslotController = require("./timeslotGenerator/timeslotsController")
 db.connect;
 
-// initialize the MQTT client
-const client = mqtt.connect({
-    host: process.env.HOST,
-    port: process.env.PORT,
-    protocol: 'mqtts',
-    username: process.env.USERNAME,
-    password: process.env.PASSWORD
-  })
+
+// MQTT Connection
+const options = {
+  host: '45fb8d87df7040eb8434cea2937cfb31.s1.eu.hivemq.cloud',
+  port: 8883,
+  protocol: 'mqtts',
+  username: 'Team5@Broker',
+  password: 'Team5@Broker'
+}
+const client = mqtt.connect(options)
 
 
-// setup the callbacks
+
 client.on('connect', function () {
     console.log('Connected Successfully');
 });
@@ -29,8 +30,7 @@ client.on('error', function (error) {
 
 
 client.on('message', function (topic, message) {
-    // called each time a message is received
-    console.log('Received message:', topic, message.toString());
+  console.log(String.fromCharCode.apply(null, message)); 
 });
 
 function publish(topic,message){
@@ -39,21 +39,68 @@ function publish(topic,message){
     });
   }
 
-  function subscribe(topic){
-    client.on("connect", () => {
-      console.log("Client:" + clientId + " connected!");
-      client.subscribe(topic, { qos: 2 });})
-  }
+  client.on("connect", () => {
+    client.subscribe([topic1], () => {
+      console.log(`Subscribed to ${topic1}`);
+    });
+  });
 
+  timeslotGenerator.createAppointment;
+
+  let topic1 = "appointment/getAllTimeslots";
+
+
+  function gettimeSlots(topic, payload) {
+    if(topic == "appointment/getAllTimeslots"){
+      BookingModel.find({dentistid : payload.dentistid , date : payload.date},
+          function(err,appointment){
+            let result = timeslotGenerator.alltimeSlots.then(app => {
+                let item = app.filter(function(appj){
+                    appj.date = payload.date;
+                    return appj.day == payload.day && appj.id == payload.dentistid
+                })
+                try {
+                var timeSlots = []
+                timeSlots = item[0].timeSlots
+                console.log(appointment);
+                for (let i=0 ; i<timeSlots.length ; i++){
+                    var slot = ""
+                    var counter = 0
+                    for(let j=0 ; j<appointment.length ; j++){
+                    if(item[0].timeSlots[i] === appointment[j].slot) {
+                    counter = counter + 1;
+                    slot = appointment[j].slot
+                    if (counter >= item[0].dentistsNum){
+                    var index = item[0].timeSlots.indexOf(slot);
+                    if(index > -1){
+                    item[0].timeSlots.splice(i,1)
+                   // console.log(item[0])
+                    }
+                }
+            }   
+        } 
+    }  item[0].requestid = payload.requestid;
+        let slots = JSON.stringify(item[0]);
+             client.publish(`sendTimeSlots/${payload.requestid}`, JSON.stringify(item[0]) , { qos: 1, retain: false });
+             console.log(item[0]);
+             }catch(error){
+              console.log(error.message);
+                }
+            })
+        })
+    }
+  } 
   
+  module.exports.gettimeSlots = gettimeSlots;
   
-module.exports={
+module.exports= {
+
     publish(topic,message){
       publish(topic,message)
     },
     subscribe(topic){
       subscribe(topic)
     },
-    client:client,
   
+    client:client,
   }
