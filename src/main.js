@@ -1,13 +1,14 @@
 var mqtt = require('mqtt');
 // const path = require('path')
 // require('dotenv').config({ path: path.resolve(__dirname, '.env') })
-const Appointment = require("./Models/AppointmentModel");
+const BookingModel = require("./Models/BookingModel");
 var db = require("./Database")
 var timeslotGenerator = require("./timeslotGenerator/timeslots")
 // var timeslotController = require("./timeslotGenerator/timeslotsController")
-
 db.connect;
 
+
+// MQTT Connection
 const options = {
   host: '45fb8d87df7040eb8434cea2937cfb31.s1.eu.hivemq.cloud',
   port: 8883,
@@ -15,8 +16,8 @@ const options = {
   username: 'Team5@Broker',
   password: 'Team5@Broker'
 }
-
 const client = mqtt.connect(options)
+
 
 
 client.on('connect', function () {
@@ -39,20 +40,19 @@ function publish(topic,message){
   }
 
   client.on("connect", () => {
-    client.subscribe([topic], () => {
-      console.log(`Subscribed to ${topic}`);
+    client.subscribe([topic1], () => {
+      console.log(`Subscribed to ${topic1}`);
     });
   });
 
   timeslotGenerator.createAppointment;
 
+  let topic1 = "appointment/getAllTimeslots";
 
-  let topic = "appointment/getAllTimeslots";
-  let response1 = "sendTimeSlots"
-  
+
   function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
-      Appointment.find({dentistid : payload.dentistid , date : payload.date},
+      BookingModel.find({dentistid : payload.dentistid , date : payload.date},
           function(err,appointment){
             let result = timeslotGenerator.alltimeSlots.then(app => {
                 let item = app.filter(function(appj){
@@ -69,7 +69,6 @@ function publish(topic,message){
                     for(let j=0 ; j<appointment.length ; j++){
                     if(item[0].timeSlots[i] === appointment[j].slot) {
                     counter = counter + 1;
-  
                     slot = appointment[j].slot
                     if (counter >= item[0].dentistsNum){
                     var index = item[0].timeSlots.indexOf(slot);
@@ -80,9 +79,9 @@ function publish(topic,message){
                 }
             }   
         } 
-    }
+    }  item[0].requestid = payload.requestid;
         let slots = JSON.stringify(item[0]);
-             client.publish(response1, slots, { qos: 1, retain: false });
+             client.publish(`sendTimeSlots/${payload.requestid}`, JSON.stringify(item[0]) , { qos: 1, retain: false });
              console.log(item[0]);
              }catch(error){
               console.log(error.message);

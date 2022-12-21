@@ -1,6 +1,6 @@
 var db = require("../Database")
 var timeslotGenerator = require("./timeslots")
-const Appointment = require("../Models/AppointmentModel");
+const BookingModel = require("../Models/BookingModel");
 
 
 /* 
@@ -11,7 +11,7 @@ db.connect;
 
 function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
-    Appointment.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
+    BookingModel.find({dentistid : payload.dentistid , date : payload.date},function(err,appointment){
             let result = timeslotGenerator.alltimeSlots.then(a => {
                 let item = a.filter(function(e){
                     e.date = payload.date;

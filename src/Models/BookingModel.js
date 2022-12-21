@@ -1,59 +1,31 @@
 const mongoose = require("mongoose");
+var Schema = mongoose.Schema;
 
 const bookingSchema = new mongoose.Schema(
     {
-        appointments: [{
-            type: String,
-            ref: 'BookingModel'
-        }],
-        description: {  //Brief explanation about the purpose of the appointment
-            type: String,
-            required: true,
-            unique: true
-        },
         user: {
-            type: String, 
+            type: Schema.Types.ObjectId, 
             ref: "users"
         },
-        date: {
-            day: { 
-                type: Number,
-                min: 1,
-                max: 31
-            },
-            month: {
-                type: Number, 
-                min: 1,  
-                max: 12
-            
-            },
-            year: {
-                type: Number,
-                min: new Date().getFullYear(),
-                max: new Date().getFullYear() + 1
-            }
-
-        },
+        day: {
+            type: String,
+           required: true,
+         },
         start: {
             type: String,
             required: true,
         },
-        end: {
-            type: String,
-            required: true
-        },
         dentist: {
-            type: String,
-            required: true,
+            type: Schema.Types.ObjectId, 
             ref: "dentists"
-
-        },
-       
+         },
         issuance: {
             type:String,
             required: true
-        }
+        },
+        
     },
 );
 
 module.exports = mongoose.model("bookingmodels", bookingSchema);
+
