@@ -42,48 +42,53 @@ async function createAppointment() {
         var openinghours =  dentistsJson.dentists[i].openinghours
         Object.keys(openinghours).forEach(async function(key) {
         var day = key;
+        // get the opening hour only from openinghours
         var openinghour = openinghours[key].slice(0, openinghours[key].indexOf('-').toString());
         var openingHour = openinghour.slice(0, openinghour.indexOf(':').toString());
+        // get the closing hour only from openinghours
         var closinghour = openinghours[key].slice(openinghours[key].lastIndexOf('-') + 1).toString();
         var closingHour = closinghour.slice(0, closinghour.indexOf(':').toString());
+        // get generated timeslots within closing and opening hours
         var timeSlots = generateTimeslots(openingHour, 00, closingHour, 30);
-        var breaks = ['12:00','12:30','15:00', '10:00']; // take away lunch anf fika times
+         // take away lunch anf fika times
+        var breaks = ['12:00','12:30','15:00', '10:00']; 
         for(let i=0; i < breaks.length; i++) {
             var slot = breaks[i];
             var index = timeSlots.indexOf(slot);
             if(index > -1) {
             timeSlots.splice(index, 1)
             }
-        }   
+        }
+  
         const timeslot = new Timeslots({
-            dentistid: dentistsJson.dentists[i]['id'],
-            name: dentistsJson.dentists[i]['name'],
+            dentistid: dentistsJson.dentists[i].id,
+            name: dentistsJson.dentists[i].name,
             openinghour: openingHour,
             closinghour: closingHour,
             timeSlots: timeSlots,
             dentistsNumber : dentistsNumber,
-            day: day,   
+            day: day,  
             })
+
             const result = await findTimeslot({
-                id: timeslot.id,
+                dentistid: timeslot.dentistid
               });
               if (result === null) {
                 timeslot.save();
+                console.log(timeslot.name +" timeslots is saved");
               } else {
-                console.log("Already saved.");
+                console.log(timeslot.name + " is Already saved.");
               }
             })
-        }
+        } 
     } 
-        createAppointment();
         const findTimeslot = async (filter) => {
             return Timeslots.findOne(filter).exec();
           };
   
+
 var alltimeSlots = createAppointment();
-
-module.exports.createAppointment =  createAppointment;
-
 module.exports= {
     alltimeSlots
 }
+
