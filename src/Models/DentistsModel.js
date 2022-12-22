@@ -1,72 +1,25 @@
-const mongoose = require('mongoose');
+var mongoose  = require('mongoose');
+const Schema = mongoose.Schema;
 
-const dentistSchema = new mongoose.Schema(
-    {
-        id: {
-            type: Number,
-            required: true,
-            unique: true
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        owner: {
-            type: String,
-            required: true
-        },
-        numberOfDentists: {
-            type: Number,
-            required: true
-        },
-        address: {
-            type: String,
-            required: true
-        },
-        city: {
-            type: String,
-            required: true,
-        },
-        coordinate: {
-            longitude: {
-                type: String,
-                required: true
-            },
-            latitude:{ 
-                type: String,
-                required: true
-            }
-        },
-        openinghours: {
-            monday: {
-            type: String,
-            required: true
-            },
-            tuesday: {
-                type: String,
-                required: true
-            },
-            wednesday: {
-                type: String,
-                required: true
-            }, 
-            thursday: {
-                type: String,
-                required: true
-            },
-            friday: {
-                type: String,
-                required: true
-            }
-        },
-        Appointment: [
-            {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "bookingmodels",
-            },
-          ],
-    }, {
-        timestamps: true // created at and updated at time
-});
+ const DentistsSchema = new Schema({
+   id: Number,
+   name: String,
+   owner: String,
+   numberOfDentists: Number,
+   address: String,
+   city: String,
+   coordinate: {
+     longitude: String,
+     latitude: String,
+   },
+   openinghours: {
+     monday: String,
+     tuesday: String,
+     wednesday: String,
+     thursday: String,
+     friday: String,
+   },
+ });
 
-module.exports = mongoose.model("dentists", dentistSchema);
+ module.exports = mongoose.model("dentists", DentistsSchema);
+ 

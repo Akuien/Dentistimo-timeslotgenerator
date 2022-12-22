@@ -1,4 +1,5 @@
 const Timeslots = require("../Models/TimeSlotsModel");
+const Dentist = require("../Models/DentistsModel");
 var moment = require('moment');
 moment().format();
 var fetch = require("node-fetch")
@@ -47,6 +48,7 @@ async function createAppointment() {
         var closinghour = openinghours[key].slice(openinghours[key].lastIndexOf('-') + 1).toString();
         var closingHour = closinghour.slice(0, closinghour.indexOf(':').toString());
         var timeSlots = generateTimeslots(openingHour, 00, closingHour, 30);
+
         var breaks = ['12:00','12:30','15:00', '10:00']; // take away lunch anf fika times
         for(let i=0; i < breaks.length; i++) {
             var slot = breaks[i];
@@ -56,30 +58,32 @@ async function createAppointment() {
             }
         }   
         const timeslot = new Timeslots({
-            dentistid: dentistsJson.dentists[i]['id'],
-            name: dentistsJson.dentists[i]['name'],
+            dentistid: dentistsJson.dentists[i].id,
+            name: dentistsJson.dentists[i].name,
             openinghour: openingHour,
             closinghour: closingHour,
             timeSlots: timeSlots,
             dentistsNumber : dentistsNumber,
-            day: day,   
+            day: day,  
             })
+
             const result = await findTimeslot({
-                id: timeslot.id,
+                dentistid: timeslot.dentistid
               });
               if (result === null) {
                 timeslot.save();
+                console.log(timeslot.name +" timeslots saved");
               } else {
-                console.log("Already saved.");
+                console.log(timeslot.name + "Already saved.");
               }
             })
-        }
+        } 
     } 
-        createAppointment();
         const findTimeslot = async (filter) => {
             return Timeslots.findOne(filter).exec();
           };
   
+
 var alltimeSlots = createAppointment();
 
 module.exports.createAppointment =  createAppointment;

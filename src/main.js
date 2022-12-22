@@ -1,10 +1,10 @@
 var mqtt = require('mqtt');
 // const path = require('path')
 // require('dotenv').config({ path: path.resolve(__dirname, '.env') })
-const BookingModel = require("./Models/BookingModel");
+const TimeSlotsModel = require("./Models/TimeSlotsModel");
 var db = require("./Database")
 var timeslotGenerator = require("./timeslotGenerator/timeslots")
-// var timeslotController = require("./timeslotGenerator/timeslotsController")
+
 db.connect;
 
 
@@ -52,44 +52,37 @@ function publish(topic,message){
 
   function gettimeSlots(topic, payload) {
     if(topic == "appointment/getAllTimeslots"){
-      BookingModel.find({dentistid : payload.dentistid , date : payload.date},
-          function(err,appointment){
-            let result = timeslotGenerator.alltimeSlots.then(app => {
-                let item = app.filter(function(appj){
-                    appj.date = payload.date;
-                    return appj.day == payload.day && appj.id == payload.dentistid
-                })
+      TimeSlotsModel.find({dentistid : payload.dentistid , name : payload.name},
+          function(err,t){
                 try {
                 var timeSlots = []
                 timeSlots = item[0].timeSlots
-                console.log(appointment);
                 for (let i=0 ; i<timeSlots.length ; i++){
+                  var appj = 0;
                     var slot = ""
                     var counter = 0
-                    for(let j=0 ; j<appointment.length ; j++){
-                    if(item[0].timeSlots[i] === appointment[j].slot) {
+                    for(let j=0 ; j<t.length ; j++){
+                    if(item[0].timeSlots[i] === t[j].slot) {
                     counter = counter + 1;
-                    slot = appointment[j].slot
-                    if (counter >= item[0].dentistsNum){
+                    slot = t[j].slot
+                    if (counter >= item[0].dentistsNumber){
                     var index = item[0].timeSlots.indexOf(slot);
                     if(index > -1){
-                    item[0].timeSlots.splice(i,1)
-                   // console.log(item[0])
+                      timeSlots = item[0].timeSlots.splice(i,1)
                     }
                 }
             }   
         } 
-    }  item[0].requestid = payload.requestid;
-        let slots = JSON.stringify(item[0]);
-             client.publish(`sendTimeSlots/${payload.requestid}`, JSON.stringify(item[0]) , { qos: 1, retain: false });
+    } let slots = JSON.stringify(timeSlots);
+             client.publish('sendTimeSlots', slots , { qos: 1, retain: false });
              console.log(item[0]);
              }catch(error){
               console.log(error.message);
                 }
             })
-        })
+        }
     }
-  } 
+   
   
   module.exports.gettimeSlots = gettimeSlots;
   
