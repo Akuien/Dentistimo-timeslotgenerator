@@ -2,13 +2,103 @@ const Timeslots = require("../Models/TimeSlotsModel");
 var moment = require('moment');
 moment().format();
 var fetch = require("node-fetch")
-
+var mongoose = require('mongoose');
+var mqtt = require("mqtt");
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, './.env') })
 
 
 let mthd = {
     method: "Get"
 };
 
+// Variables
+var mongoURI = process.env.MONGODB_URI || 'mongodb+srv://Dentistimo:QsyJymgvpYZZeJPc@cluster0.hnkdpp5.mongodb.net/?retryWrites=true&w=majority'; 
+var port = process.env.PORT || 3000;
+// Connect to MongoDB
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true }, function(err) {
+    if (err) {
+        console.error(`Failed to connect to MongoDB with URI: ${mongoURI}`);
+        console.error(err.stack);
+        process.exit(1);
+    }
+    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
+}); 
+
+const options = {
+    host: '45fb8d87df7040eb8434cea2937cfb31.s1.eu.hivemq.cloud',
+    port: 8883,
+    protocol: 'mqtts',
+    username: 'Team5@Broker',
+    password: 'Team5@Broker'
+  }
+  
+  const client = mqtt.connect(options)
+  
+    let topic = "dentist/getTimeslots";
+  
+    client.on("message", function (topic, message) {
+      console.log(String.fromCharCode.apply(null, message)); 
+    });
+  
+    client.on("message", (topic, payload) => {
+      console.log('Received message here:', topic, payload.toString());
+      console.log(payload.toString());
+    });
+    
+    // setup the callbacks
+client.on('connect', function () {
+    console.log('Connected Successfully');
+    console.log('Listening...');
+  });
+  
+  client.on('error', function (error) {
+    console.log(error);
+  });
+  
+    
+    client.on("connect", () => {
+      console.log("Connected!!!22");
+    });
+    
+
+     client.subscribe("times");
+
+    client.subscribe('dentist/getTimeslots', function () {
+        // When a message arrives, print it to the console
+        client.on('message', function (topic, message) {
+      
+          // console.log("Received this lovely " + message + "  on " + topic + " yaay")
+          
+          const dentistDetails = JSON.parse(message);
+          let dentistid = dentistDetails.id;
+      
+          // console.log("dentist: ", dentistid);
+      
+          if(topic === 'dentist/getTimeslots') {
+
+        Timeslots.find(
+        { dentistid: dentistid },
+        function (err, gentime) {
+          if (err) {
+            return next(err);
+          }
+          
+            let responseString = JSON.stringify(gentime);
+           // console.log('response:::::   ' + responseString)
+    
+             client.publish( "ui/dentistTimeSlotsFound", responseString, 1, (error) => {
+                if (error) {
+                  console.error(error);
+                } else {
+                  console.log("sent the user appointmets to UI ")
+                }
+              }); 
+        } 
+          )}
+      })
+      }) 
+      
 let dentistsUrl = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 async function getDentists() {
     try {
