@@ -72,13 +72,14 @@ client.on('connect', function () {
           
           const dentistDetails = JSON.parse(message);
           let dentistid = dentistDetails.id;
+          let day = dentistDetails.day;
       
           // console.log("dentist: ", dentistid);
       
           if(topic === 'dentist/getTimeslots') {
 
         Timeslots.find(
-        { dentistid: dentistid },
+        { dentistid: dentistid, day: day },
         function (err, gentime) {
           if (err) {
             return next(err);
@@ -98,7 +99,7 @@ client.on('connect', function () {
           )}
       })
       }) 
-      
+
 let dentistsUrl = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 async function getDentists() {
     try {
