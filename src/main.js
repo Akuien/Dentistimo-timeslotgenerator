@@ -1,9 +1,8 @@
 var mqtt = require('mqtt');
-// const path = require('path')
-// require('dotenv').config({ path: path.resolve(__dirname, '.env') })
-const TimeSlotsModel = require("./Models/TimeSlotsModel");
-var db = require("./Database")
+const Timeslots = require("./Models/TimeSlotsModel");
+const Booking = require("./Models/BookingModel");
 var timeslotGenerator = require("./timeslotGenerator/timeslots")
+var db = require("./Database")
 db.connect;
 
 
@@ -19,19 +18,99 @@ const client = mqtt.connect(options)
 
 
 
-client.on('connect', function () {
+  // setup the callbacks
+  client.on('connect', function () {
     console.log('Connected Successfully');
-});
-
-client.on('error', function (error) {
+    console.log('Listening...');
+  });
+  
+  client.on('error', function (error) {
     console.log(error);
-});
+  });
 
 
 client.on('message', function (topic, message) {
   console.log(String.fromCharCode.apply(null, message)); 
 });
 
+
+  timeslotGenerator.alltimeSlots;
+
+
+  let topic = "dentist/getTimeslots";
+
+
+  client.on("message", (topic, payload) => {
+    console.log('Received message here:', topic, payload.toString());
+    console.log(payload.toString());
+  });
+
+
+
+   client.subscribe("times");
+
+  client.subscribe('dentist/getTimeslots', function () {
+      // When a message arrives, print it to the console
+      client.on('message', function (topic, message) {
+    
+        // console.log("Received this lovely " + message + "  on " + topic + " yaay")
+        
+        const dentistDetails = JSON.parse(message);
+        let dentistid = dentistDetails.id;
+        let day = dentistDetails.day;
+    
+        // console.log("dentist: ", dentistid);
+    
+        if(topic === 'dentist/getTimeslots') {
+
+      Timeslots.find({ dentistid: dentistid, day: day },
+      function (err, gentime) {
+        if (err) {
+          return next(err);
+        }
+        let responseString = JSON.stringify(gentime);
+         // console.log('response:::::   ' + responseString)
+  
+           client.publish( "ui/dentistTimeSlotsFound", responseString, 1, (error) => {
+              if (error) {
+                console.error(error);
+              } else {
+                console.log("sent the user appointmets to UI ")
+              }
+            }); 
+      } 
+        )}
+    })
+    }) 
+
+    //recieve availability check request
+    client.on('message', (topic, message) => {
+      if (topic === 'appointment/request') {
+        const { date, time } = JSON.parse(message);
+        checkAppointmentAvailability(date, time, (err, availability) => {
+          if (err) {
+            console.error(err);
+          } else {
+            client.publish('appointment/response', JSON.stringify({ available: availability }));
+          }
+        });
+      }
+    });
+    
+    function checkAppointmentAvailability(date, time, callback) {
+      Booking.find({ date: date, start: time }, (err, bookings) => {
+        if (err) {
+          return callback(err);
+        }
+        if (bookings.length > 0) {
+          callback(null, false);
+        } else {
+          callback(null, true);
+        }
+      });
+    }
+
+/* 
 function publish(topic,message){
     client.publish(topic, message, {
       qos: 2
@@ -44,7 +123,6 @@ function publish(topic,message){
     });
   });
 
-  timeslotGenerator.createAppointment;
 
   let topic1 = "appointment/getAllTimeslots";
 
@@ -83,7 +161,7 @@ function publish(topic,message){
     }
    
   
-  module.exports.gettimeSlots = gettimeSlots;
+  module.exports.gettimeSlots = gettimeSlots; */
   
 module.exports= {
 
