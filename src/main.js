@@ -83,7 +83,19 @@ client.on('message', function (topic, message) {
     })
     }) 
 
-    //recieve availability check request
+    function checkAppointmentAvailability(date, time, callback) {
+      // Find the number of available dentists at the given time
+      Booking.find({ availability: { $gt: 0 }, start: time, date: date }, (err, bookings) => {
+        if (err) {
+          return callback(err);
+        }
+        // Return the availability result
+        callback(null, bookings.length > 0);
+      });
+    }
+    
+    client.subscribe('appointment/request', 'subscribed to appointment/request ')
+    // Receive availability check request
     client.on('message', (topic, message) => {
       if (topic === 'appointment/request') {
         const { date, time } = JSON.parse(message);
@@ -97,71 +109,9 @@ client.on('message', function (topic, message) {
       }
     });
     
-    function checkAppointmentAvailability(date, time, callback) {
-      Booking.find({ date: date, start: time }, (err, bookings) => {
-        if (err) {
-          return callback(err);
-        }
-        if (bookings.length > 0) {
-          callback(null, false);
-        } else {
-          callback(null, true);
-        }
-      });
-    }
-
-/* 
-function publish(topic,message){
-    client.publish(topic, message, {
-      qos: 2
-    });
-  }
-
-  client.on("connect", () => {
-    client.subscribe([topic1], () => {
-      console.log(`Subscribed to ${topic1}`);
-    });
-  });
 
 
-  let topic1 = "appointment/getAllTimeslots";
-
-
-  function gettimeSlots(topic, payload) {
-    if(topic == "appointment/getAllTimeslots"){
-      TimeSlotsModel.find({dentistid : payload.dentistid , name : payload.name},
-          function(err,t){
-                try {
-                var timeSlots = []
-                timeSlots = item[0].timeSlots
-                for (let i=0 ; i<timeSlots.length ; i++){
-                  var appj = 0;
-                    var slot = ""
-                    var counter = 0
-                    for(let j=0 ; j<t.length ; j++){
-                    if(item[0].timeSlots[i] === t[j].slot) {
-                    counter = counter + 1;
-                    slot = t[j].slot
-                    if (counter >= item[0].dentistsNumber){
-                    var index = item[0].timeSlots.indexOf(slot);
-                    if(index > -1){
-                      timeSlots = item[0].timeSlots.splice(i,1)
-                    }
-                }
-            }   
-        } 
-    } let slots = JSON.stringify(timeSlots);
-             client.publish('sendTimeSlots', slots , { qos: 1, retain: false });
-             console.log(item[0]);
-             }catch(error){
-              console.log(error.message);
-                }
-            })
-        }
-    }
-   
   
-  module.exports.gettimeSlots = gettimeSlots; */
   
 module.exports= {
 
