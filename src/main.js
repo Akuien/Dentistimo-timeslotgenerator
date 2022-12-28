@@ -71,7 +71,7 @@ client.on('message', function (topic, message) {
         let responseString = JSON.stringify(gentime);
          // console.log('response:::::   ' + responseString)
   
-           client.publish( "ui/dentistTimeSlotsFound", responseString, 1, (error) => {
+           client.publish( "ui/dentistTimeSlotsFound", responseString,{ qos: 2, retain: false}, (error) => {
               if (error) {
                 console.error(error);
               } else {
@@ -83,14 +83,14 @@ client.on('message', function (topic, message) {
     })
     }) 
 
-    function checkAppointmentAvailability(date, time, callback) {
-      // Find the number of available dentists at the given time
-      Booking.find({ availability: { $gt: 0 }, start: time, date: date }, (err, bookings) => {
+    function checkAppointmentAvailability(date, start, callback) {
+      // Find all bookings at the given time
+      Booking.find({ start: start, date: date }, (err, bookings) => {
         if (err) {
           return callback(err);
         }
         // Return the availability result
-        callback(null, bookings.length > 0);
+        callback(null, bookings.length === 0);
       });
     }
     
@@ -98,12 +98,16 @@ client.on('message', function (topic, message) {
     // Receive availability check request
     client.on('message', (topic, message) => {
       if (topic === 'appointment/request') {
-        const { date, time } = JSON.parse(message);
-        checkAppointmentAvailability(date, time, (err, availability) => {
+        const { date, start } = JSON.parse(message);
+        checkAppointmentAvailability(date, start, (err, availability) => {
           if (err) {
             console.error(err);
           } else {
-            client.publish('appointment/response', JSON.stringify({ available: availability }));
+            client.publish('appointment/response', JSON.stringify({ available: availability }), { qos: 2, retain: false}, (error)=> {
+              if (error) {
+                console.error(error);
+              }
+            });
           }
         });
       }
