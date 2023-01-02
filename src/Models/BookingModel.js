@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-
 const bookingSchema = new mongoose.Schema(
     {
         user: {
@@ -8,7 +7,11 @@ const bookingSchema = new mongoose.Schema(
             ref: "users"
         },
         day: {
-            type: String,
+           type: String,
+           required: true,
+         },
+         date: {
+           type: String,
            required: true,
          },
         start: {
@@ -22,10 +25,9 @@ const bookingSchema = new mongoose.Schema(
         issuance: {
             type:String,
             required: true
-        },
-        
+        }
     },
+    { timestamps: true }
 );
 
 module.exports = mongoose.model("bookingmodels", bookingSchema);
-

@@ -6,6 +6,7 @@ var db = require("./Database")
 db.connect;
 
 
+
 // MQTT Connection
 const options = {
   host: '45fb8d87df7040eb8434cea2937cfb31.s1.eu.hivemq.cloud',
@@ -28,10 +29,6 @@ const client = mqtt.connect(options)
     console.log(error);
   });
 
-
-client.on('message', function (topic, message) {
-  console.log(String.fromCharCode.apply(null, message)); 
-});
 
 
   timeslotGenerator.alltimeSlots;
